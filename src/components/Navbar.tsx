@@ -36,20 +36,22 @@ export default function Navbar() {
         </Link>
 
         <div className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
-                isActive(link.path)
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${isActive(link.path)
                   ? 'text-brand-400 bg-brand-500/10'
                   : 'text-surface-400 hover:text-white hover:bg-surface-800/50'
-              }`}
-            >
-              {link.icon && <link.icon className="w-3.5 h-3.5" />}
-              {link.label}
-            </Link>
-          ))}
+                  }`}
+              >
+                {Icon && <Icon className="w-3.5 h-3.5" />}
+                {link.label}
+              </Link>
+            );
+          })}
         </div>
 
         <div className="hidden md:flex items-center gap-3">
@@ -91,17 +93,20 @@ export default function Navbar() {
 
       {mobileOpen && (
         <div className="md:hidden bg-surface-950 border-b border-surface-800 px-4 pb-4 space-y-1 animate-slide-up">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm text-surface-300 hover:bg-surface-800 transition"
-            >
-              {link.icon && <link.icon className="w-4 h-4" />}
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm text-surface-300 hover:bg-surface-800 transition"
+              >
+                {Icon && <Icon className="w-4 h-4" />}
+                {link.label}
+              </Link>
+            );
+          })}
           <div className="border-t border-surface-800 pt-2 mt-2">
             {user ? (
               <>
