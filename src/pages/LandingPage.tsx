@@ -4,7 +4,6 @@ import { supabase } from '../lib/supabase';
 import type { Product } from '../lib/supabase';
 import ProductCard from '../components/ProductCard';
 import AnimatedSection from '../components/ui/AnimatedSection';
-import Badge from '../components/ui/Badge';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import {
   Search, SlidersHorizontal, TrendingUp, Sparkles, Shield, Globe,
