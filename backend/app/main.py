@@ -2,10 +2,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from app.core import get_settings
-from app.api import api_router
-from app.middleware import ErrorHandlingMiddleware, LoggingMiddleware
-from app.models import Base, engine
+from app.core.config import get_settings
+from app.api.routes import api_router
+from app.middleware.custom import ErrorHandlingMiddleware, LoggingMiddleware
+from app.models.base import Base, engine
 import logging
 
 # Configure logging
