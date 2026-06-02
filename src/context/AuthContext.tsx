@@ -6,7 +6,15 @@ import type { User, Session } from '@supabase/supabase-js';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  profile: { id: string; full_name: string; username: string; is_founder: boolean; is_admin: boolean; avatar_url: string; bio: string } | null;
+  profile: { 
+    id: string; 
+    full_name: string; 
+    username: string; 
+    is_founder: boolean; 
+    is_admin: boolean; 
+    avatar_url: string; 
+    bio: string 
+  } | null;
   loading: boolean;
   signUp: (email: string, password: string, fullName: string, username: string) => Promise<{ error: string | null }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
@@ -69,16 +77,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) return { error: error.message };
     return { error: null };
   };
-
-  // const signInWithGoogle = async () => {
-  //   const { error } = await supabase.auth.signInWithOAuth({
-  //     provider: 'google',
-  //     options: {
-  //       redirectTo: `${window.location.origin}/auth/callback`,
-  //     },
-  //   });
-  //   if (error) console.error('Google sign-in error:', error);
-  // };
 
   const signOut = async () => {
     await supabase.auth.signOut();
