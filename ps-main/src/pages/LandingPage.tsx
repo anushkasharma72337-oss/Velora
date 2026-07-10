@@ -31,13 +31,22 @@ export default function LandingPage() {
   }, []);
 
   const fetchProducts = async () => {
-    const { data } = await supabase
-      .from('products')
-      .select('*, profiles(full_name, username, avatar_url)')
-      .eq('status', 'active')
-      .order('upvotes', { ascending: false });
-    setProducts(data || []);
-    setLoading(false);
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, profiles(full_name, username, avatar_url)')
+        .eq('status', 'active')
+        .order('upvotes', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching products:', error);
+      }
+      setProducts(data || []);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filtered = products.filter((p) => {
@@ -184,20 +193,23 @@ export default function LandingPage() {
             </div>
           </AnimatedSection>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {categories.filter(c => c.id !== 'all').map((cat, i) => (
-              <AnimatedSection key={cat.id} delay={i * 80}>
-                <button
-                  onClick={() => { setActiveCategory(cat.id); window.scrollTo({ top: 600, behavior: 'smooth' }); }}
-                  className="w-full glass rounded-xl p-5 hover:border-brand-500/30 hover:bg-brand-500/5 transition-all group text-center"
-                >
-                  <cat.icon className="w-8 h-8 text-brand-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-                  <div className="text-sm font-semibold text-white">{cat.label}</div>
-                  <div className="text-xs text-surface-500 mt-1">
-                    {products.filter(p => p.category === cat.id).length} products
-                  </div>
-                </button>
-              </AnimatedSection>
-            ))}
+            {categories.filter(c => c.id !== 'all').map((cat, i) => {
+              const Icon = cat.icon;
+              return (
+                <AnimatedSection key={cat.id} delay={i * 80}>
+                  <button
+                    onClick={() => { setActiveCategory(cat.id); window.scrollTo({ top: 600, behavior: 'smooth' }); }}
+                    className="w-full glass rounded-xl p-5 hover:border-brand-500/30 hover:bg-brand-500/5 transition-all group text-center"
+                  >
+                    <Icon className="w-8 h-8 text-brand-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+                    <div className="text-sm font-semibold text-white">{cat.label}</div>
+                    <div className="text-xs text-surface-500 mt-1">
+                      {products.filter(p => p.category === cat.id).length} products
+                    </div>
+                  </button>
+                </AnimatedSection>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -214,7 +226,7 @@ export default function LandingPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search products..."
-                className="w-full sm:w-64 pl-10 pr-4 py-2.5 bg-surface-900 border border-surface-800 rounded-xl text-sm text-white placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition"
+                className="w-full sm:w-64 pl-10 pr-4 py-2.5 bg-surface-900 border border-surface-800 rounded-xl text-sm text-white placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
               />
             </div>
             <div className="hidden lg:flex items-center gap-1.5">
@@ -238,20 +250,23 @@ export default function LandingPage() {
 
         {/* Mobile category filter */}
         <div className="flex lg:hidden items-center gap-1.5 mb-6 overflow-x-auto pb-2 -mx-1 px-1">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition whitespace-nowrap flex items-center gap-1 ${
-                activeCategory === cat.id
-                  ? 'bg-brand-600 text-white'
-                  : 'bg-surface-800 text-surface-400 hover:text-white'
-              }`}
-            >
-              <cat.icon className="w-3 h-3" />
-              {cat.label}
-            </button>
-          ))}
+          {categories.map((cat) => {
+            const Icon = cat.icon;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition whitespace-nowrap flex items-center gap-1 ${
+                  activeCategory === cat.id
+                    ? 'bg-brand-600 text-white'
+                    : 'bg-surface-800 text-surface-400 hover:text-white'
+                }`}
+              >
+                <Icon className="w-3 h-3" />
+                {cat.label}
+              </button>
+            );
+          })}
         </div>
 
         {loading ? (

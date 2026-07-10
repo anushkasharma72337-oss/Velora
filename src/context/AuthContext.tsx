@@ -18,6 +18,7 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, fullName: string, username: string) => Promise<{ error: string | null }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -30,12 +31,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('id, full_name, username, is_founder, is_admin, avatar_url, bio')
-      .eq('id', userId)
-      .maybeSingle();
-    setProfile(data);
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, full_name, username, is_founder, is_admin, avatar_url, bio')
+        .eq('id', userId)
+        .maybeSingle();
+      setProfile(data);
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+    }
   };
 
   useEffect(() => {
@@ -43,6 +48,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) fetchProfile(session.user.id);
+      setLoading(false);
+    }).catch((err) => {
+      console.error('Error getting session:', err);
       setLoading(false);
     });
 
@@ -60,31 +68,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string, username: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) return { error: error.message };
-    if (data.user) {
-      await supabase.from('profiles').insert({
-        id: data.user.id,
-        full_name: fullName,
-        username,
-      });
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) return { error: error.message };
+      if (data.user) {
+        await supabase.from('profiles').insert({
+          id: data.user.id,
+          full_name: fullName,
+          username,
+        });
+      }
+      return { error: null };
+    } catch (err) {
+      console.error('Error signing up:', err);
+      return { error: err instanceof Error ? err.message : 'An error occurred during signup' };
     }
-    return { error: null };
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: error.message };
-    return { error: null };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return { error: error.message };
+      return { error: null };
+    } catch (err) {
+      console.error('Error signing in:', err);
+      return { error: err instanceof Error ? err.message : 'An error occurred during signin' };
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      await supabase.auth.signInWithOAuth({ provider: 'google' });
+    } catch (err) {
+      console.error('Error signing in with Google:', err);
+      throw err;
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setProfile(null);
+    try {
+      await supabase.auth.signOut();
+      setProfile(null);
+    } catch (err) {
+      console.error('Error signing out:', err);
+      throw err;
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, signUp, signIn, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );
